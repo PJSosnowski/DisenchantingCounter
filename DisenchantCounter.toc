@@ -1,0 +1,11 @@
+## Interface: 99999
+## Title: DisenchantCounter
+## Notes: todo
+## Author: Sose3
+## Version: 0.0.1
+## RequiredDeps:
+## X-Curse-Project-ID: 999999
+## SavedVariables:
+## SavedVariablesPerCharacter:
+
+DisenchantCounter.lua
