@@ -207,7 +207,6 @@ infoCommandsText:SetJustifyH("LEFT")
 infoCommandsText:SetText("/disenchantingcounter or /dec")
 
 -- Settings Frame - dropdown
-local LDD = LibStub("LibUIDropDownMenu-4.0")
 local chatChannelLabel = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 chatChannelLabel:SetPoint("TOPLEFT", infoText, "BOTTOMLEFT", 0, -40)
 chatChannelLabel:SetText("Chat channel for summary:")

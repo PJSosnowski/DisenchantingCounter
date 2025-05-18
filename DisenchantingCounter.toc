@@ -1,4 +1,4 @@
-## Interface: 99999
+## Interface: 999999
 ## Title: DisenchantingCounter
 ## Notes: Beta
 ## Author: Sose3
