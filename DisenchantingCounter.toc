@@ -4,7 +4,7 @@
 ## Author: Sose3
 ## Version: 0.0.1
 ## RequiredDeps:
-## X-Curse-Project-ID: 999999
+## X-Curse-Project-ID: 1268243
 ## SavedVariablesPerCharacter: DisenchantingCounterDB
 ## SavedVariables:
 
