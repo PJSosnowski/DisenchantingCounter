@@ -1,1 +1,0 @@
-print("MyAddon successfully loaded!")
