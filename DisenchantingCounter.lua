@@ -181,34 +181,33 @@ end)
 
 -- Settings frame
 local settingsFrame = CreateFrame("Frame", "DisenchantCounterSettingsFrame", UIParent, "BackdropTemplate")
-settingsFrame:SetSize(300, 150)
 settingsFrame:SetPoint("CENTER")
 settingsFrame:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-    tile = true, tileSize = 16, edgeSize = 16,
-    insets = { left = 4, right = 4, top = 4, bottom = 4 }
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    tile = true, tileSize = 32, edgeSize = 32,
+    insets = { left = 11, right = 12, top = 12, bottom = 11 }
 })
 settingsFrame:SetBackdropColor(0, 0, 0, 0.9)
 settingsFrame:SetFrameStrata("DIALOG")
 settingsFrame:Hide()
 
 local closeButton = CreateFrame("Button", nil, settingsFrame, "UIPanelCloseButton")
-closeButton:SetPoint("TOPRIGHT", -5, -5)
 
 local infoText = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-infoText:SetPoint("TOPLEFT", 15, -30)
+infoText:SetPoint("TOPLEFT", 15, -40)
 infoText:SetJustifyH("LEFT")
 infoText:SetText("To open or hide the DisenchantingCounter window, use:")
 
 local infoCommandsText = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-infoCommandsText:SetPoint("TOPLEFT", 15, -42)
+infoCommandsText:SetPoint("TOPLEFT", infoText, "BOTTOMLEFT", 0, -5)
 infoCommandsText:SetJustifyH("LEFT")
 infoCommandsText:SetText("/disenchantingcounter or /dec")
 
--- Settings Frame - dropdown
+-- -- Settings Frame - dropdown
 local chatChannelLabel = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-chatChannelLabel:SetPoint("TOPLEFT", infoText, "BOTTOMLEFT", 0, -40)
+chatChannelLabel:SetPoint("TOPLEFT", infoCommandsText, "BOTTOMLEFT", 0, -20)
+chatChannelLabel:SetJustifyH("LEFT")
 chatChannelLabel:SetText("Chat channel for summary:")
 
 local chatChannels = { "Party", "Raid", "Say" }
@@ -216,7 +215,7 @@ local chatChannels = { "Party", "Raid", "Say" }
 local dropdown = CreateFrame("Frame", "MyAddonDropdown", settingsFrame, "UIDropDownMenuTemplate")
 dropdown:SetPoint("TOPLEFT", chatChannelLabel, "BOTTOMLEFT", -15, -5)
 UIDropDownMenu_SetWidth(dropdown, 100)
-UIDropDownMenu_SetText(dropdown, SelectedChannel)
+UIDropDownMenu_SetText(dropdown, SelectedChannel or "Party")
 
 UIDropDownMenu_Initialize(dropdown, function(self, level)
     for _, channel in ipairs(chatChannels) do
@@ -231,10 +230,53 @@ UIDropDownMenu_Initialize(dropdown, function(self, level)
     end
 end)
 
+-- -- Settings Frame - dynamic window size
+settingsFrame:Show()
+local texts = { infoText, infoCommandsText, chatChannelLabel }
+
+local maxWidth = 0
+for _, fontString in ipairs(texts) do
+    local w = fontString:GetStringWidth()
+    if w > maxWidth then
+        maxWidth = w
+    end
+end
+
+local dropdownWidth = 180
+if dropdown:GetWidth() and dropdown:GetWidth() > 0 then
+    dropdownWidth = dropdown:GetWidth()
+end
+
+if dropdownWidth > maxWidth then
+    maxWidth = dropdownWidth
+end
+
+local paddingX = 40
+local totalWidth = maxWidth + paddingX
+
+local spacing = {
+    40, -- top padding
+    infoText:GetStringHeight(),
+    5,
+    infoCommandsText:GetStringHeight(),
+    20,
+    chatChannelLabel:GetStringHeight(),
+    5,
+    26, -- dropdown approx height
+    15 -- bottom padding
+}
+local totalHeight = 0
+for _, v in ipairs(spacing) do
+    totalHeight = totalHeight + v
+end
+
+settingsFrame:SetSize(totalWidth, totalHeight)
+closeButton:SetPoint("TOPRIGHT", -5, -5)
+settingsFrame:Hide()
+
 
 -- Confirm reset frame
 local confirmResetFrame = CreateFrame("Frame", "MyAddonConfirmResetFrame", UIParent, "BasicFrameTemplateWithInset")
-confirmResetFrame:SetSize(230, 100)
 confirmResetFrame:SetPoint("CENTER")
 confirmResetFrame:SetFrameStrata("DIALOG")
 confirmResetFrame:Hide()
@@ -245,12 +287,10 @@ confirmText:SetText("Are you sure you want to reset counter?")
 
 local yesBtn = CreateFrame("Button", nil, confirmResetFrame, "UIPanelButtonTemplate")
 yesBtn:SetSize(80, 22)
-yesBtn:SetPoint("BOTTOMLEFT", 30, 20)
 yesBtn:SetText("Yes")
 
 local cancelBtn = CreateFrame("Button", nil, confirmResetFrame, "UIPanelButtonTemplate")
 cancelBtn:SetSize(80, 22)
-cancelBtn:SetPoint("BOTTOMRIGHT", -30, 20)
 cancelBtn:SetText("Cancel")
 
 yesBtn:SetScript("OnClick", function()
@@ -261,6 +301,22 @@ end)
 cancelBtn:SetScript("OnClick", function()
     confirmResetFrame:Hide()
 end)
+
+-- Confirm reset frame - dynamic window size
+confirmResetFrame:Show()
+local textWidth = confirmText:GetStringWidth()
+local buttonsWidth = yesBtn:GetWidth() + cancelBtn:GetWidth() + 40 -- 40 = przerwa między przyciskami i marginesy
+
+local paddingX = 40
+local totalWidth = math.max(textWidth, buttonsWidth) + paddingX
+
+yesBtn:SetPoint("BOTTOMLEFT", 20, 15)
+cancelBtn:SetPoint("BOTTOMRIGHT", -20, 15)
+
+local totalHeight = 30 + confirmText:GetStringHeight() + 15 + yesBtn:GetHeight() + 20
+confirmResetFrame:SetSize(totalWidth, totalHeight)
+confirmResetFrame:Hide()
+
 
 -- Reload button
 local reloadBtn = CreateFrame("Button", nil, mainFrame)
@@ -428,6 +484,7 @@ end)
 -- Slash functions
 SLASH_MYADDON1 = "/disenchantingcoutner"
 SLASH_MYADDON2 = "/dec"
+-- todo save is shown and is hidden to DisenchantingCounterDB
 SlashCmdList["MYADDON"] = function()
     if mainFrame:IsShown() then
 		mainFrame:Hide()
