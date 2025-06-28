@@ -2,7 +2,7 @@
 ## Title: DisenchantingCounter
 ## Notes: Beta
 ## Author: Sose3
-## Version: 0.2.0
+## Version: 0.2.1
 ## RequiredDeps:
 ## X-Curse-Project-ID: 1268243
 ## SavedVariablesPerCharacter: DisenchantingCounterDB
