@@ -5,8 +5,8 @@ local FRAME_PADDING = 4
 local TEXT_SIZE = 15
 
 -- Variables
--- todo - move to DisenchantingCounterDB
 SelectedChannel = "Party"
+IsWindowShown = true
 
 local summaryData = {
     -- Dusts
@@ -50,7 +50,22 @@ local summaryLookup = {}
 -- Functions
 local function InitializeSavedData()
     if not DisenchantingCounterDB then
-        DisenchantingCounterDB = {
+        DisenchantingCounterDB = {}
+    end
+
+    if not DisenchantingCounterDB.selectedChannel then
+        DisenchantingCounterDB.selectedChannel = "Party"
+    else
+        SelectedChannel = DisenchantingCounterDB.selectedChannel
+    end
+
+    if DisenchantingCounterDB.isWindowShown == nil then
+        DisenchantingCounterDB.isWindowShown = true
+    end
+    IsWindowShown = DisenchantingCounterDB.isWindowShown
+
+    if not DisenchantingCounterDB.data then
+        DisenchantingCounterDB.data = {
             ["Strange Dust"] = 0,
             ["Soul Dust"] = 0,
             ["Vision Dust"] = 0,
@@ -82,10 +97,10 @@ local function InitializeSavedData()
     end
 
     for _, entry in ipairs(summaryData) do
-        entry.value = DisenchantingCounterDB[entry.key]
+        entry.value = DisenchantingCounterDB.data[entry.key]
 
         if entry.row and entry.row.valueText then
-            local newValue = DisenchantingCounterDB[entry.key] or 0
+            local newValue = DisenchantingCounterDB.data[entry.key] or 0
             entry.row.valueText:SetText(tostring(newValue))
         end
     end
@@ -103,12 +118,12 @@ end
 
 function IncrementSummary(key, amount)
     local data = summaryLookup[key]
-    local current = DisenchantingCounterDB[key] or 0
+    local current = DisenchantingCounterDB.data[key] or 0
     local newValue = current + amount
 
     data.row.valueText:SetText(tostring(newValue))
     data.value = newValue
-    DisenchantingCounterDB[key] = newValue
+    DisenchantingCounterDB.data[key] = newValue
 end
 
 local function ResetSummary()
@@ -116,7 +131,7 @@ local function ResetSummary()
         entry.value = 0
         entry.row.valueText:SetText("0")
         summaryLookup[entry.key].value = 0
-        DisenchantingCounterDB[entry.key] = 0
+        DisenchantingCounterDB.data[entry.key] = 0
     end
     print("DisenchantingCounter: Counter has been reset")
 end
@@ -224,6 +239,7 @@ UIDropDownMenu_Initialize(dropdown, function(self, level)
         info.checked = (channel == SelectedChannel)
         info.func = function()
             SelectedChannel = channel
+            DisenchantingCounterDB.selectedChannel = channel
             UIDropDownMenu_SetText(dropdown, channel)
         end
         UIDropDownMenu_AddButton(info)
@@ -326,7 +342,6 @@ reloadBtn.icon:SetAllPoints()
 reloadBtn.icon:SetTexture("Interface\\Icons\\Spell_holy_borrowedtime")
 reloadBtn:SetScript("OnClick", function()
     confirmResetFrame:Show()
-    
 end)
 reloadBtn:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
 
@@ -478,17 +493,26 @@ frame:RegisterEvent("ADDON_LOADED")
 frame:SetScript("OnEvent", function(_, event, arg1)
     if event == "ADDON_LOADED" and arg1 == "DisenchantingCounter" then
         InitializeSavedData()
+        UIDropDownMenu_SetText(dropdown, SelectedChannel)
+        if IsWindowShown then
+            mainFrame:Show()
+        else
+            mainFrame:Hide()
+        end
     end
 end)
 
 -- Slash functions
 SLASH_MYADDON1 = "/disenchantingcoutner"
 SLASH_MYADDON2 = "/dec"
--- todo save is shown and is hidden to DisenchantingCounterDB
 SlashCmdList["MYADDON"] = function()
     if mainFrame:IsShown() then
+        IsWindowShown = false
+        DisenchantingCounterDB.isWindowShown = false
 		mainFrame:Hide()
 	else
 		mainFrame:Show()
+        DisenchantingCounterDB.isWindowShown = true
+        IsWindowShown = true
 	end
 end
